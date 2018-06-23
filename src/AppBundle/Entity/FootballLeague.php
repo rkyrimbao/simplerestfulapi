@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * FootballLeague
  *
  * @ORM\Table(name="football_league")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\FootballLeagueRepository")
  */
 class FootballLeague
 {
