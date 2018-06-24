@@ -17,7 +17,7 @@ class FootballLeagueManager
 		$this->entityManager = $entityManager;
 	}
 
-	public function save(FootballLeague $league, $isUpdate)
+	public function save(FootballLeague $league, $isUpdate = false)
 	{
 		$entityManager = $this->entityManager;
 
