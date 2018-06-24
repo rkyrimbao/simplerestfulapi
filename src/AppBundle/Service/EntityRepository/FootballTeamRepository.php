@@ -3,9 +3,10 @@
 namespace AppBundle\Service\EntityRepository;
 
 use Doctrine\ORM\EntityManager;
-use AppBundle\Entity\FootballLeague;
 
-class FootballLeagueRepository
+use AppBundle\Entity\FootballTeam;
+
+class FootballTeamRepository
 {	
 	protected $entityManager;
 
@@ -14,11 +15,10 @@ class FootballLeagueRepository
 		$this->entityManager = $entityManager;
 	}
 
-	public function save(FootballLeague $league)
+	public function save(FootballTeam $footballTeam)
 	{
 		$entityManager = $this->entityManager;
-
-		$entityManager->persist($league);
+		$entityManager->persist($footballTeam);
 		$entityManager->flush();
 	}
 
@@ -26,11 +26,11 @@ class FootballLeagueRepository
 	{
 		return $this
 			->entityManager
-			->getRepository(FootballLeague::class);
+			->getRepository(FootballTeam::class);
 	}
 
 	public function createNew()
 	{
-		return new FootballLeague();
+		return new FootballTeam();
 	}
 }

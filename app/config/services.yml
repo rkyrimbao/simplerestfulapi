@@ -33,9 +33,16 @@ services:
     # AppBundle\Service\ExampleService:
     #     arguments:
     #         $someArgument: 'some_value'
-    service.entity.football_repository:
+    service.entity_repository.football_league:
         autowire: false
         public: true
         class: AppBundle\Service\EntityRepository\FootballLeagueRepository
+        arguments:
+            - '@doctrine.orm.entity_manager'
+
+    service.entity_repository.football_team:
+        autowire: false
+        public: true
+        class: AppBundle\Service\EntityRepository\FootballTeamRepository
         arguments:
             - '@doctrine.orm.entity_manager'

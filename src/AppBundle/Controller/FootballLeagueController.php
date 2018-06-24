@@ -8,9 +8,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 use AppBundle\Controller\BaseApiController;
 use AppBundle\Entity\FootballLeague;
@@ -20,11 +21,11 @@ class FootballLeagueController extends BaseApiController
     /**
      * @Route("/leagues")
      */
-    public function indexAction(Request $request)
+    public function showAction(Request $request)
     {	
     	$this->validateRequest();
 
-    	$serviceRepo = $this->get('service.entity.football_repository');
+    	$serviceRepo = $this->get('service.entity_repository.football_league');
 
     	$leagues = $serviceRepo
     		->createQuery()
@@ -51,7 +52,7 @@ class FootballLeagueController extends BaseApiController
     public function createAction(Request $request)
     {	
     	$this->validateRequest();
-    	
+
     	$data = array();
     	$name = $request->get('name', '');
 
@@ -61,7 +62,7 @@ class FootballLeagueController extends BaseApiController
 
     	try {
 
-    		$serviceRepo = $this->get('service.entity.football_repository');
+    		$serviceRepo = $this->get('service.entity_repository.football_league');
 
     		$league = $serviceRepo->createNew();
     		$league->setName($name);
@@ -71,7 +72,7 @@ class FootballLeagueController extends BaseApiController
     		return new JsonResponse(array('message' => 'New Leaque Has Been Created!'), 200);
 
     	}
-    	catch (EntityNotFoundException $e) {
+    	catch (\Exception $e) {
     		throw $e;
     	}
     }
