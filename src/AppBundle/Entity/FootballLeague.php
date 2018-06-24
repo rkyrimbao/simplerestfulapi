@@ -28,6 +28,13 @@ class FootballLeague
      */
     private $name;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="status", type="boolean", nullable=false)
+     */
+    private $status = '1';
+
 
 
     /**
@@ -62,5 +69,29 @@ class FootballLeague
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Set status
+     *
+     * @param boolean $status
+     *
+     * @return FootballLeague
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get status
+     *
+     * @return boolean
+     */
+    public function getStatus()
+    {
+        return $this->status;
     }
 }
