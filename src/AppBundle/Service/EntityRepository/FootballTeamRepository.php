@@ -15,10 +15,21 @@ class FootballTeamRepository
 		$this->entityManager = $entityManager;
 	}
 
-	public function save(FootballTeam $footballTeam)
+	public function save(FootballTeam $footballTeam, $isUpdate = false)
 	{
 		$entityManager = $this->entityManager;
-		$entityManager->persist($footballTeam);
+
+		if (!$isUpdate) {
+			$entityManager->persist($footballTeam);
+		}
+
+		$entityManager->flush();
+	}
+
+	public function delete(FootballTeam $footballTeam)
+	{
+		$entityManager = $this->entityManager;
+		$entityManager->remove($footballTeam);
 		$entityManager->flush();
 	}
 

@@ -117,7 +117,7 @@ class FootballTeamController extends BaseApiController
 
 			$team->setFootballLeague($league);
 
-			$foolballTeamRepo->save($team);
+			$foolballTeamRepo->save($team, true);
 
 			return new Response('Team updated with id '. $team->getId());
 		}
