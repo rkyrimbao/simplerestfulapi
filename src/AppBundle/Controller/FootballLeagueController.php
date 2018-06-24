@@ -12,15 +12,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
+use AppBundle\Controller\BaseApiController;
 use AppBundle\Entity\FootballLeague;
 
-class FootballLeagueController extends Controller
+class FootballLeagueController extends BaseApiController
 {
     /**
-     * @Route("/league")
+     * @Route("/leagues")
      */
     public function indexAction(Request $request)
     {	
+    	$this->validateRequest();
+
     	$serviceRepo = $this->get('service.entity.football_repository');
 
     	$leagues = $serviceRepo
@@ -47,6 +50,8 @@ class FootballLeagueController extends Controller
 	 */
     public function createAction(Request $request)
     {	
+    	$this->validateRequest();
+    	
     	$data = array();
     	$name = $request->get('name', '');
 
