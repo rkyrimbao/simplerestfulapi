@@ -9,6 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -18,33 +19,6 @@ use AppBundle\Entity\FootballLeague;
 
 class FootballLeagueController extends BaseApiController
 {
-    /**
-     * @Route("/leagues")
-     */
-    public function showAction(Request $request)
-    {	
-    	$this->validateRequest();
-
-    	$serviceRepo = $this->get('service.entity_repository.football_league');
-
-    	$leagues = $serviceRepo
-    		->createQuery()
-    		->findAllOrderedByName();
-
-    	$data = array();
-
-    	foreach ($leagues as $league) {
-    		$data[] = array(
-    			'id' => $league->getId(),
-    			'name' => $league->getName()
-    		);
-    	}
-
-        return new JsonResponse(array(
-        	'league' => $data
-        ));
-    }
-
     /**
      * @Route("/league/create")
      * @Method({ "GET" })
@@ -62,18 +36,77 @@ class FootballLeagueController extends BaseApiController
 
     	try {
 
-    		$serviceRepo = $this->get('service.entity_repository.football_league');
+    		$entityManager = $this->get('service.entity_manager.football_league');
 
-    		$league = $serviceRepo->createNew();
+    		$league = $entityManager->createNew();
     		$league->setName($name);
 
-    		$serviceRepo->save($league);
+    		$entityManager->save($league);
 
-    		return new JsonResponse(array('message' => 'New Leaque Has Been Created!'), 200);
+            return new Response('New Leaque Has Been Created!');
 
     	}
     	catch (\Exception $e) {
     		throw $e;
     	}
+    }
+
+    /**
+     * @Route("/league/{league}")
+     */
+    public function showLeagueAction(Request $request)
+    {   
+        $this->validateRequest();
+
+        $leagueName = $request->get('league', '');
+
+        $entityManager = $this->get('service.entity_manager.football_team');
+    
+
+        $teams = $entityManager
+            ->getRepository()
+            ->findTeamRelatedToLeague($leagueName);
+
+        if (!$teams) {
+            return new Response('No results found!');
+        }
+
+        $data = array();
+        foreach ($teams as $team) {
+
+            $league = $team->getFootballLeague();
+            
+            $data[$league->getName()] = array(
+                'id' => $team->getId(),
+                'name' => $team->getName()
+            );
+        }
+
+        return new JsonResponse(array(
+            'league' => $data
+        ));
+    }
+
+    /**
+     * @Route("/leagues/{id}/delete")
+     *
+     */
+    public function deleteAction(Request $request)
+    {
+        $this->validateRequest();
+
+        $entityManager = $this->get('service.entity_manager.football_league');
+
+        $league = $entityManager
+            ->getRepository()
+            ->findOneById($request->get('id', 0));
+
+        if (!$league) {
+            throw $this->createNotFoundException('League not found.');
+        }
+
+        $entityManager->delete($league);
+
+        return new Response('Delete successfull');        
     }
 }

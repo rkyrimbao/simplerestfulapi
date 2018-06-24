@@ -1,12 +1,12 @@
 <?php
 
-namespace AppBundle\Service\EntityRepository;
+namespace AppBundle\Service\EntityManager;
 
 use Doctrine\ORM\EntityManager;
 
 use AppBundle\Entity\FootballTeam;
 
-class FootballTeamRepository
+class FootballTeamManager
 {	
 	protected $entityManager;
 
@@ -33,7 +33,7 @@ class FootballTeamRepository
 		$entityManager->flush();
 	}
 
-	public function createQuery()
+	public function getRepository()
 	{
 		return $this
 			->entityManager

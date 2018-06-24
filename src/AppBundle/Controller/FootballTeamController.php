@@ -34,11 +34,11 @@ class FootballTeamController extends BaseApiController
 			throw $this->createNotFoundException('name, strip, and league is required.');
 		}
 
-		$foolballLeagueRepo = $this->get('service.entity_repository.football_league');
-		$foolballTeamRepo = $this->get('service.entity_repository.football_team');
+		$foolballLeagueManager = $this->get('service.entity_manager.football_league');
+		$foolballTeamManager = $this->get('service.entity_manager.football_team');
 
 		try {
-			$league = $foolballLeagueRepo
+			$league = $foolballLeagueManager
 				->createQuery()
 				->findOneByName($leagueName);
 
@@ -47,20 +47,20 @@ class FootballTeamController extends BaseApiController
              * create the new league
              */
 			if (!$league) {
-				$league = $foolballLeagueRepo
+				$league = $foolballLeagueManager
 					->createNew()
 					->setName($leagueName);
 
-				$foolballLeagueRepo->save($league);
+				$foolballLeagueManager->save($league);
 			}
 
-			$team = $foolballTeamRepo->createNew();
+			$team = $foolballTeamManager->createNew();
 
 			$team->setName($name);
 			$team->setStrip($strip);
 			$team->setFootballLeague($league);
 
-			$foolballTeamRepo->save($team);
+			$foolballTeamManager->save($team);
 
 			return new Response('Saved new team with id '. $team->getId());
 		}
@@ -79,10 +79,10 @@ class FootballTeamController extends BaseApiController
 
 		$id = $request->get('id', 0);
 
-		$foolballTeamRepo = $this->get('service.entity_repository.football_team');
-		$foolballLeagueRepo = $this->get('service.entity_repository.football_league');
+		$foolballTeamManager = $this->get('service.entity_manager.football_team');
+		$foolballLeagueManager = $this->get('service.entity_manager.football_league');
 
-		$team = $foolballTeamRepo
+		$team = $foolballTeamManager
 			->createQuery()
 			->findOneById($id);
 
@@ -95,16 +95,16 @@ class FootballTeamController extends BaseApiController
 			$strip = $request->get('strip', '');
 			$leagueName = $request->get('league', '');
 
-			$league = $foolballLeagueRepo
+			$league = $foolballLeagueManager
 				->createQuery()
 				->findOneByName($leagueName);
 
 			if (!$league) {
-				$league = $foolballLeagueRepo
+				$league = $foolballLeagueManager
 					->createNew()
 					->setName($leagueName);
 
-				$foolballLeagueRepo->save($league);
+				$foolballLeagueManager->save($league);
 			}
 
 			if ($name) {
@@ -117,7 +117,7 @@ class FootballTeamController extends BaseApiController
 
 			$team->setFootballLeague($league);
 
-			$foolballTeamRepo->save($team, true);
+			$foolballTeamManager->save($team, true);
 
 			return new Response('Team updated with id '. $team->getId());
 		}
