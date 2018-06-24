@@ -68,4 +68,61 @@ class FootballTeamController extends BaseApiController
 			throw $e;
 		}
 	}
+
+	/**
+	 * @Route("/league/update-team")
+	 * @Method({ "GET" })
+	 */
+	public function updateAction(Request $request)
+	{
+		$data  = $request->query->get('data');
+
+		$id = $request->get('id', 0);
+
+		$foolballTeamRepo = $this->get('service.entity_repository.football_team');
+		$foolballLeagueRepo = $this->get('service.entity_repository.football_league');
+
+		$team = $foolballTeamRepo
+			->createQuery()
+			->findOneById($id);
+
+		if (!$team) {
+			throw $this->createNotFoundException(sprintf('No team found for id %s', $id));
+		}
+
+		try {
+			$name = $request->get('name', '');
+			$strip = $request->get('strip', '');
+			$leagueName = $request->get('league', '');
+
+			$league = $foolballLeagueRepo
+				->createQuery()
+				->findOneByName($leagueName);
+
+			if (!$league) {
+				$league = $foolballLeagueRepo
+					->createNew()
+					->setName($leagueName);
+
+				$foolballLeagueRepo->save($league);
+			}
+
+			if ($name) {
+				$team->setName($name);
+			}
+
+			if ($strip) {
+				$team->setStrip($strip);
+			}
+
+			$team->setFootballLeague($league);
+
+			$foolballTeamRepo->save($team);
+
+			return new Response('Team updated with id '. $team->getId());
+		}
+		catch (\Exception $e) {
+			throw $e;
+		}
+	}
 }
