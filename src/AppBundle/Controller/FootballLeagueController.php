@@ -74,7 +74,7 @@ class FootballLeagueController extends BaseApiController
 
         foreach ($teams as $team) {
             $league = $team->getFootballLeague();
-            $data[$league->getName()] = array(
+            $data[$league->getName()][] = array(
                 'id' => $team->getId(),
                 'name' => $team->getName()
             );
