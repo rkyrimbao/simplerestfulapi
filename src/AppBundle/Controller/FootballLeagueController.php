@@ -31,7 +31,7 @@ class FootballLeagueController extends BaseApiController
     	$name = $request->get('name', '');
 
     	if (!$name) {
-    		throw new \Exception("Error Processing Request", 1);
+            return new JsonResponse('Please provide league name.', Response::HTTP_NOT_ACCEPTABLE);
     	}
 
     	try {
@@ -43,7 +43,7 @@ class FootballLeagueController extends BaseApiController
 
     		$entityManager->save($league);
 
-            return new Response('New Leaque Has Been Created!');
+            return new JsonResponse('Leage has been created.', Response::HTTP_OK);
 
     	}
     	catch (\Exception $e) {
@@ -67,7 +67,7 @@ class FootballLeagueController extends BaseApiController
             ->findTeamRelatedToLeague($leagueName);
 
         if (!$teams) {
-            return new Response('No results found!');
+            return new JsonResponse('No Results Found!');
         }
 
         $data = array();
@@ -105,6 +105,6 @@ class FootballLeagueController extends BaseApiController
 
         $entityManager->delete($league);
 
-        return new Response('Delete successfull');        
+        return new JsonResponse('Leage has been deleted.', Response::HTTP_OK);
     }
 }
