@@ -19,9 +19,9 @@ class FootballTeamRepository extends EntityRepository
 
 		$queryBuilder
 			->select('t')
-			->from('AppBundle:FootballTeam', 't')
-			->join('AppBundle:FootballLeague', 'l')
-			->where('l.name = :league_name')
+			->from('AppBundle\Entity\FootballTeam', 't')
+			->leftJoin('AppBundle\Entity\FootballLeague', 'l', \Doctrine\ORM\Query\Expr\Join::WITH, 't.footballLeague = l.id')
+			->andWhere('l.name = :league_name')
 			->andWhere('l.status = :league_status')
 			->setParameters(array(
 				'league_name' => $league,

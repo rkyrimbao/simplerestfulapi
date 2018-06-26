@@ -61,7 +61,6 @@ class FootballLeagueController extends BaseApiController
         $leagueName = $request->get('league', '');
 
         $entityManager = $this->get('service.entity_manager.football_team');
-    
 
         $teams = $entityManager
             ->getRepository()
@@ -72,10 +71,9 @@ class FootballLeagueController extends BaseApiController
         }
 
         $data = array();
-        foreach ($teams as $team) {
 
+        foreach ($teams as $team) {
             $league = $team->getFootballLeague();
-            
             $data[$league->getName()] = array(
                 'id' => $team->getId(),
                 'name' => $team->getName()

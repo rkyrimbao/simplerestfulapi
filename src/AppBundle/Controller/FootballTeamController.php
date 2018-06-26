@@ -19,7 +19,7 @@ use AppBundle\Controller\BaseApiController;
 class FootballTeamController extends BaseApiController
 {	
 	/**
-     * @Route("/league/create-team")
+     * @Route("/team/create")
      * @Method({ "GET" })
 	 */
 	public function createAction(Request $request)
@@ -39,7 +39,7 @@ class FootballTeamController extends BaseApiController
 
 		try {
 			$league = $foolballLeagueManager
-				->createQuery()
+				->getRepository()
 				->findOneByName($leagueName);
 
 			/*
@@ -70,7 +70,7 @@ class FootballTeamController extends BaseApiController
 	}
 
 	/**
-	 * @Route("/league/update-team")
+	 * @Route("/team/update")
 	 * @Method({ "GET" })
 	 */
 	public function updateAction(Request $request)
