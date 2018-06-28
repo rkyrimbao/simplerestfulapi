@@ -17,8 +17,6 @@ parameters:
     api_secret: 'simplerestfulapi'
     api_refresh_token_lifetime: 18000 #5 hours
     api_access_token_lifetime: 2592000  #10 mins
-    api_keys: #use by the apps
-        - rky
-        - cnn
-        - rmb
+    api_keys:
+        - 92d0585a-48ee-41be-8f4a-56e32a4e839b
 

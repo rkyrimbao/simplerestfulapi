@@ -34,7 +34,7 @@ class BaseApiController extends Controller implements ApiControllerInterface
 	protected function validateApiKeyChain($headers) 
 	{
 		if (!$this->container->getParameter('api_keys')) {
-			return new JsonResponse(array('error' => 'Authentication Required'));
+			return new JsonResponse(array('error' => 'No API Keys Defined in parameters.yml'));
 		}
 
 		$apiKeys = $this->container->getParameter('api_keys');
