@@ -39,7 +39,7 @@ class BaseApiController extends Controller implements ApiControllerInterface
 
 		$apiKeys = $this->container->getParameter('api_keys');
 
-		if (!isset($headers['api-key']) || !in_array($headers['api-key'][0], $apiKeys)) {
+		if (!isset($headers['x-api-request']) || !in_array($headers['x-api-request'][0], $apiKeys)) {
 			return new JsonResponse(array('error' => 'Authentication Required'));
 		}
 	}
