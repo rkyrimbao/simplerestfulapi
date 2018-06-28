@@ -33,6 +33,13 @@ services:
     # AppBundle\Service\ExampleService:
     #     arguments:
     #         $someArgument: 'some_value'
+    service.subscribe.authentication:
+        autowire: false,
+        public : false,
+        class : AppBundle\Event\TokenSubscriber
+        arguments:
+            - '%api_keys%'
+            
     service.entity_manager.football_league:
         autowire: false
         public: true

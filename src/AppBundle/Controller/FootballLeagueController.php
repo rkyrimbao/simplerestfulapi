@@ -21,34 +21,53 @@ class FootballLeagueController extends BaseApiController
 {
     /**
      * @Route("/league/create")
-     * @Method({ "GET" })
+     * @Method({ "POST" })
 	 */
     public function createAction(Request $request)
     {	
-    	$this->validateRequest();
-
     	$data = array();
     	$name = $request->get('name', '');
 
+        $entityManager = $this->get('service.entity_manager.football_league');
+
     	if (!$name) {
-            return new JsonResponse('Please provide league name.', Response::HTTP_NOT_ACCEPTABLE);
-    	}
+            return new JsonResponse([ 
+                'success' => false,
+                'errors' => [
+                    'name' => "Please provide data"
+                ]
+            ], Response::HTTP_NOT_ACCEPTABLE);
+        }
+
+        if ($entityManager->getRepository()->findByName($name)) {
+            return new JsonResponse([
+                'success' => false,
+                'errors' => [
+                    'name' => "{$name} already exists"
+                ]
+            ]);
+        }
 
     	try {
 
-    		$entityManager = $this->get('service.entity_manager.football_league');
+            $league = $entityManager->createNew();
+            $league->setName($name);
 
-    		$league = $entityManager->createNew();
-    		$league->setName($name);
+            $entityManager->save($league);
 
-    		$entityManager->save($league);
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'League has been created.', 
+                'data' => [
+                    'id' => $league->getId(),
+                    'name' => $league->getName()
+                ]
+            ], Response::HTTP_OK);
 
-            return new JsonResponse('Leage has been created.', Response::HTTP_OK);
-
-    	}
-    	catch (\Exception $e) {
-    		throw $e;
-    	}
+        }
+        catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -56,33 +75,44 @@ class FootballLeagueController extends BaseApiController
      */
     public function showLeagueAction(Request $request)
     {   
-        $this->validateRequest();
-
-        $leagueName = $request->get('league', '');
+        $leagueID = $request->get('league', '');
 
         $entityManager = $this->get('service.entity_manager.football_team');
 
+        $league = $this->get('service.entity_manager.football_league')
+            ->getRepository()
+            ->findOneBy([ 'id' => $leagueID, 'status' => 1]);
+
+        if (is_null($league)) {
+            return new JsonResponse([
+                'data' => [
+                    'league' => []
+                ]
+            ]);
+        }
+
         $teams = $entityManager
             ->getRepository()
-            ->findTeamRelatedToLeague($leagueName);
+            ->findByFootballLeague($league);
 
-        if (!$teams) {
-            return new JsonResponse('No Results Found!');
-        }
-
-        $data = array();
-
+        $teamData = [];
         foreach ($teams as $team) {
-            $league = $team->getFootballLeague();
-            $data[$league->getName()][] = array(
+            $teamData[] = [
                 'id' => $team->getId(),
-                'name' => $team->getName()
-            );
+                'name' => $team->getName(),
+                'strip' => $team->getStrip()
+            ];
         }
 
-        return new JsonResponse(array(
-            'league' => $data
-        ));
+        return new JsonResponse([
+            'data' => [
+                'league' => [
+                    'id' => $league->getId(),
+                    'name' => $league->getName(),
+                ],
+                'teams' => $teamData
+            ]
+        ]);
     }
 
     /**
@@ -91,8 +121,6 @@ class FootballLeagueController extends BaseApiController
      */
     public function deleteAction(Request $request)
     {
-        $this->validateRequest();
-
         $entityManager = $this->get('service.entity_manager.football_league');
 
         $league = $entityManager
@@ -100,11 +128,19 @@ class FootballLeagueController extends BaseApiController
             ->findOneById($request->get('id', 0));
 
         if (!$league) {
-            throw $this->createNotFoundException('League not found.');
+            return new JsonResponse([
+                'succes' => false,
+                'errors' => [
+                    'league' => 'Not found! with ID '.$request->get('id')
+                ]
+            ], Response::HTTP_OK);
         }
 
         $entityManager->delete($league);
 
-        return new JsonResponse('Leage has been deleted.', Response::HTTP_OK);
+        return new JsonResponse([
+            'success' => true,
+            'errors' => [],
+        ], Response::HTTP_OK);
     }
 }

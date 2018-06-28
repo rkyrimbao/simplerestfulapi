@@ -20,25 +20,52 @@ class FootballTeamController extends BaseApiController
 {	
 	/**
      * @Route("/team/create")
-     * @Method({ "GET" })
+     * @Method({ "POST" })
 	 */
 	public function createAction(Request $request)
 	{
-		$this->validateRequest();
-
 		$name = $request->get('name', '');
 		$strip = $request->get('strip', '');
 		$leagueName = $request->get('league', '');
 
 		if (!$name || !$strip || !$leagueName) {
-			throw $this->createNotFoundException('name, strip, and league is required.');
+			$errors = [];
+
+			if (!$name) {
+				$errors['name'] = '`name` is required';
+			}
+
+			if (!$strip) {
+				$errors['strip'] = '`strip` is required';
+			}
+				
+			if (!$leagueName) {
+				$errors['league'] = '`league` is required';
+			}
+
+			return new JsonResponse([
+				'errors' => $errors,
+				'success' => false
+			]);
 		}
 
 		$foolballLeagueManager = $this->get('service.entity_manager.football_league');
 		$foolballTeamManager = $this->get('service.entity_manager.football_team');
 
+		$footballTeam = $footballTeamManager->getRepository()->findOneByName(['name' => $name]);
+
+		if (!is_null($footballTeam)) {
+			return new JsonResponse([
+				'errors' => [
+					'name' => "{$name} already exists."
+				],
+				'success' => false
+			]);
+		}
+
 		try {
-			$league = $foolballLeagueManager
+
+			$league = $footballLeagueManager
 				->getRepository()
 				->findOneByName($leagueName);
 
@@ -53,6 +80,16 @@ class FootballTeamController extends BaseApiController
 
 				$foolballLeagueManager->save($league);
 			}
+			else {
+				if (!$league->getStatus()) {
+					return new JsonResponse([
+						'success' => false,
+						'errors' => [
+							'league' => 'Please choose different league'
+						]
+					]);
+				}
+			}
 
 			$team = $foolballTeamManager->createNew();
 
@@ -62,7 +99,15 @@ class FootballTeamController extends BaseApiController
 
 			$foolballTeamManager->save($team);
 
-			return new Response('Saved new team with id '. $team->getId());
+			return new JsonResponse(['data' => [
+				'id' => $team->getId(),
+				'name' => $team->getName(),
+				'strip' => $team->getStrip(),
+				'league' => [
+					'id' => $team->getFootballLeague()->getId(),
+					'name' => $team->getFootballLeague()->getName()
+				]
+			]]);
 		}
 		catch (\Exception $e) {
 			throw $e;
@@ -70,8 +115,8 @@ class FootballTeamController extends BaseApiController
 	}
 
 	/**
-	 * @Route("/team/update")
-	 * @Method({ "GET" })
+	 * @Route("/team/{id}/update")
+	 * @Method({ "POST" })
 	 */
 	public function updateAction(Request $request)
 	{
@@ -79,12 +124,14 @@ class FootballTeamController extends BaseApiController
 
 		$id = $request->get('id', 0);
 
-		$foolballTeamManager = $this->get('service.entity_manager.football_team');
-		$foolballLeagueManager = $this->get('service.entity_manager.football_league');
+		$footballTeamManager = $this->get('service.entity_manager.football_team');
+		$footballLeagueManager = $this->get('service.entity_manager.football_league');
 
-		$team = $foolballTeamManager
-			->createQuery()
-			->findOneById($id);
+		$team = $footballTeamManager
+					->getRepository()
+					->findOneById($id);
+
+		$originalName = $team->getName();
 
 		if (!$team) {
 			throw $this->createNotFoundException(sprintf('No team found for id %s', $id));
@@ -95,19 +142,19 @@ class FootballTeamController extends BaseApiController
 			$strip = $request->get('strip', '');
 			$leagueName = $request->get('league', '');
 
-			$league = $foolballLeagueManager
-				->createQuery()
-				->findOneByName($leagueName);
+			$league = $footballLeagueManager
+						->getRepository()
+						->findOneByName($leagueName);
 
 			if (!$league) {
-				$league = $foolballLeagueManager
+				$league = $footballLeagueManager
 					->createNew()
 					->setName($leagueName);
 
-				$foolballLeagueManager->save($league);
+				$footballLeagueManager->save($league);
 			}
 
-			if ($name) {
+			if (is_null($footballTeamManager->getRepository()->findOneByName($name))) {
 				$team->setName($name);
 			}
 
@@ -117,9 +164,22 @@ class FootballTeamController extends BaseApiController
 
 			$team->setFootballLeague($league);
 
-			$foolballTeamManager->save($team, true);
+			$footballTeamManager->save($team, true);
 
-			return new Response('Team updated with id '. $team->getId());
+			return new JsonResponse([
+				'errors' => [],
+				'data' => [
+					'league' => [
+						'id' => $league->getId(),
+						'name' => $league->getName()
+					],
+					'team' => [
+						'id' => $team->getId(),
+						'name' => $team->getName(),
+						'strip' => $team->getStrip()
+					]
+				]
+			]);
 		}
 		catch (\Exception $e) {
 			throw $e;

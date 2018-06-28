@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 
 use AppBundle\Controller\Api\ApiControllerInterface;
 
@@ -25,7 +24,7 @@ class BaseApiController extends Controller implements ApiControllerInterface
 		$headers = $request->headers->all();
 		
 		if (!isset($headers['x-api-request'])) {
-            throw new CustomUserMessageAuthenticationException('Invalid Request.');
+            return new JsonResponse(array('error' => 'Authentication Required'));
         }
 
 		$this->validateApiKeyChain($headers);
@@ -35,13 +34,13 @@ class BaseApiController extends Controller implements ApiControllerInterface
 	protected function validateApiKeyChain($headers) 
 	{
 		if (!$this->container->getParameter('api_keys')) {
-			throw new CustomUserMessageAuthenticationException('No defined keys in parameters.yml');
+			return new JsonResponse(array('error' => 'Authentication Required'));
 		}
 
 		$apiKeys = $this->container->getParameter('api_keys');
 
 		if (!isset($headers['api-key']) || !in_array($headers['api-key'][0], $apiKeys)) {
-			throw new CustomUserMessageAuthenticationException(sprintf('API Key "%s" does not exist.', $headers['api-key'][0]));
+			return new JsonResponse(array('error' => 'Authentication Required'));
 		}
 	}
 }
