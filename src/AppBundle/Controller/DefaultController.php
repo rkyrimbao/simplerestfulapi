@@ -13,8 +13,6 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-        // replace this example code with whatever you need
-        
         $jwt = new \Lindelius\JWT\JWT();
 
         $jwt->exp = time() + (60 * 60 * 2); // expire after 2 hours
